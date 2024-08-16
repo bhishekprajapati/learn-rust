@@ -3,6 +3,9 @@
 //   Even better, extract that logic and reuse it in both places. You can use
 //   private functions or private static methods for that.
 
+// In short, If we want to make chainable apis then we have to
+// take ownership else we can just borrow
+
 pub struct Ticket {
     title: String,
     description: String,
@@ -45,6 +48,39 @@ impl Ticket {
     pub fn status(&self) -> &String {
         &self.status
     }
+
+    pub fn set_title(&mut self, val: String) {
+        let title = val.as_str();
+
+        if title.is_empty() {
+            panic!("Title cannot be empty");
+        }
+        if title.len() > 50 {
+            panic!("Title cannot be longer than 50 bytes");
+        }
+
+        self.title = val;
+    }
+
+    pub fn set_description(&mut self, val: String) {
+        let description = val.as_str();
+        if description.is_empty() {
+            panic!("Description cannot be empty");
+        }
+        if description.len() > 500 {
+            panic!("Description cannot be longer than 500 bytes");
+        }
+
+        self.description = val;
+    }
+
+    pub fn set_status(&mut self, val: String) {
+        let status = val.as_str();
+        if status != "To-Do" && status != "In Progress" && status != "Done" {
+            panic!("Only `To-Do`, `In Progress`, and `Done` statuses are allowed");
+        }
+        self.status = val;
+    }
 }
 
 #[cfg(test)]
@@ -80,14 +116,14 @@ mod tests {
     #[should_panic(expected = "Title cannot be longer than 50 bytes")]
     fn title_cannot_be_longer_than_fifty_chars() {
         Ticket::new(valid_title(), valid_description(), "To-Do".into())
-            .set_title(overly_long_title())
+            .set_title(overly_long_title());
     }
 
     #[test]
     #[should_panic(expected = "Description cannot be longer than 500 bytes")]
     fn description_cannot_be_longer_than_500_chars() {
         Ticket::new(valid_title(), valid_description(), "To-Do".into())
-            .set_description(overly_long_description())
+            .set_description(overly_long_description());
     }
 
     #[test]
